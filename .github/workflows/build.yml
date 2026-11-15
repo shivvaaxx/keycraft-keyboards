@@ -1,0 +1,38 @@
+name: Keyboard library
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check every layout file
+        run: python3 scripts/build.py --check
+
+  publish:
+    if: github.event_name == 'push'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the library
+        run: python3 scripts/build.py --out dist --base-url "https://github.com/${{ github.repository }}/releases/download/db-latest"
+      - name: Publish to the db-latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view db-latest >/dev/null 2>&1; then
+            gh release create db-latest --title "Keyboard library" --notes "Built automatically from main." --latest
+          fi
+          # Upload the data file before the manifest, so a client never sees a manifest whose file isn't there yet.
+          gh release upload db-latest dist/via-keyboards.zlib --clobber
+          gh release upload db-latest dist/manifest.json --clobber
+          gh release edit db-latest --notes "Built automatically from ${GITHUB_SHA::12}. $(python3 -c 'import json;m=json.load(open("dist/manifest.json"));print(m["count"],"keyboards, built",m["builtAt"])')"
