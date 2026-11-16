@@ -41,3 +41,7 @@ keyboard maker who contributed there.
 
 This repository is licensed under the GNU General Public License v3.0, the same license as
 the-via/keyboards. See [LICENSE](LICENSE).
+
+The MCHOSE GX87 layout (`keyboards/mchose/gx87.json`) is MCHOSE's own `gx87_via.json` from their
+QMK source ([jonylee1986/qmk_firmware_master](https://github.com/jonylee1986/qmk_firmware_master),
+branch `mchose_gx87`), unchanged.
